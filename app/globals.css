@@ -1,0 +1,177 @@
+@import 'tailwindcss';
+@import 'tw-animate-css';
+@import 'shadcn/tailwind.css';
+
+@custom-variant dark (&:is(.dark *));
+
+@theme inline {
+  --font-heading: var(--font-sans);
+  --font-sans: var(--font-geist-sans), 'Geist Fallback';
+  --font-mono: var(--font-geist-mono), 'Geist Mono Fallback';
+
+  --color-sidebar-ring: var(--sidebar-ring);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar: var(--sidebar);
+  --color-chart-5: var(--chart-5);
+  --color-chart-4: var(--chart-4);
+  --color-chart-3: var(--chart-3);
+  --color-chart-2: var(--chart-2);
+  --color-chart-1: var(--chart-1);
+  --color-ring: var(--ring);
+  --color-input: var(--input);
+  --color-border: var(--border);
+  --color-destructive: var(--destructive);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-accent: var(--accent);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-muted: var(--muted);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-secondary: var(--secondary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-primary: var(--primary);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-popover: var(--popover);
+  --color-card-foreground: var(--card-foreground);
+  --color-card: var(--card);
+  --color-foreground: var(--foreground);
+  --color-background: var(--background);
+
+  /* Nested border-radius system */
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-xl: 20px;
+  --radius-2xl: 24px;
+  --radius-3xl: 28px;
+}
+
+:root {
+  color-scheme: light;
+  --background: #ffffff;
+  --foreground: #1a1a1a;
+  --card: #ffffff;
+  --card-foreground: #1a1a1a;
+  --popover: #ffffff;
+  --popover-foreground: #1a1a1a;
+  --primary: #b7d56b;
+  --primary-foreground: #20290c;
+  --secondary: #f9f9f9;
+  --secondary-foreground: #1a1a1a;
+  --muted: #f4f4f3;
+  --muted-foreground: #707070;
+  --accent: #eef6da;
+  --accent-foreground: #3f5018;
+  --destructive: #e5484d;
+  --border: #ededeb;
+  --input: #ededeb;
+  --ring: #b7d56b;
+  --chart-1: #b7d56b;
+  --chart-2: #94b84d;
+  --chart-3: #2a2a2a;
+  --chart-4: #8a8a8a;
+  --chart-5: #cfcfcf;
+  --radius: 1rem;
+  --sidebar: #ffffff;
+  --sidebar-foreground: #1a1a1a;
+  --sidebar-primary: #b7d56b;
+  --sidebar-primary-foreground: #20290c;
+  --sidebar-accent: #f4f4f3;
+  --sidebar-accent-foreground: #1a1a1a;
+  --sidebar-border: #ededeb;
+  --sidebar-ring: #b7d56b;
+}
+
+.dark {
+  color-scheme: dark;
+  --background: #000000;
+  --foreground: #f5f5f5;
+  --card: #0d0d0d;
+  --card-foreground: #f5f5f5;
+  --popover: #0d0d0d;
+  --popover-foreground: #f5f5f5;
+  --primary: #c2e070;
+  --primary-foreground: #11150a;
+  --secondary: #161616;
+  --secondary-foreground: #f5f5f5;
+  --muted: #161616;
+  --muted-foreground: #8a8a8a;
+  --accent: #1c2410;
+  --accent-foreground: #c2e070;
+  --destructive: #ff6166;
+  --border: oklch(1 0 0 / 8%);
+  --input: oklch(1 0 0 / 12%);
+  --ring: #c2e070;
+  --chart-1: #c2e070;
+  --chart-2: #9bbf4e;
+  --chart-3: #e8e8e8;
+  --chart-4: #707070;
+  --chart-5: #3a3a3a;
+  --sidebar: #0d0d0d;
+  --sidebar-foreground: #f5f5f5;
+  --sidebar-primary: #c2e070;
+  --sidebar-primary-foreground: #11150a;
+  --sidebar-accent: #161616;
+  --sidebar-accent-foreground: #f5f5f5;
+  --sidebar-border: oklch(1 0 0 / 8%);
+  --sidebar-ring: #c2e070;
+}
+
+@layer base {
+  /* StudyPilot theme */
+  * {
+    @apply border-border outline-ring/50;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
+  html {
+    @apply font-sans;
+  }
+}
+
+@layer utilities {
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+  .no-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+}
+
+/* Micro-interaction keyframes */
+@keyframes sp-pop {
+  0% {
+    transform: scale(1);
+  }
+  45% {
+    transform: scale(1.18);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+@keyframes sp-fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-sp-pop {
+  animation: sp-pop 0.35s ease-out;
+}
+
+.animate-sp-fade-up {
+  animation: sp-fade-up 0.4s ease-out both;
+}
