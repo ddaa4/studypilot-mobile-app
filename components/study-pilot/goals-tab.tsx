@@ -1,6 +1,7 @@
 'use client'
 
-import { Check, Plus } from 'lucide-react'
+import { useState } from 'react'
+import { Check, Plus, X } from 'lucide-react'
 import { initialGoals, type Goal } from './data'
 import { CircularProgress, SectionHeader } from './ui-bits'
 
@@ -32,17 +33,43 @@ function GoalCard({ goal }: { goal: Goal }) {
 }
 
 export function GoalsTab() {
-  const weekly = initialGoals.filter((g) => g.period === 'Weekly')
-  const monthly = initialGoals.filter((g) => g.period === 'Monthly')
-  const active = initialGoals.filter((g) => !g.done)
-  const completed = initialGoals.filter((g) => g.done)
+  const [goals, setGoals] = useState<Goal[]>(initialGoals)
+  const [showAdd, setShowAdd] = useState(false)
+  const [goalTitle, setGoalTitle] = useState('')
+  const [goalTarget, setGoalTarget] = useState('')
+
+  const addGoal = () => {
+    const title = goalTitle.trim()
+    const target = Number(goalTarget)
+    if (!title || !target || target <= 0) return
+    setGoals((prev) => [
+      ...prev,
+      {
+        id: `g${Date.now()}`,
+        title,
+        period: 'Weekly',
+        current: 0,
+        target,
+        unit: 'units',
+        done: false,
+      },
+    ])
+    setGoalTitle('')
+    setGoalTarget('')
+    setShowAdd(false)
+  }
+
+  const weekly = goals.filter((g) => g.period === 'Weekly')
+  const monthly = goals.filter((g) => g.period === 'Monthly')
+  const active = goals.filter((g) => !g.done)
+  const completed = goals.filter((g) => g.done)
 
   const overall = Math.round(
-    (initialGoals.reduce(
+    (goals.reduce(
       (acc, g) => acc + Math.min(1, g.current / g.target),
       0,
     ) /
-      initialGoals.length) *
+      goals.length) *
       100,
   )
 
@@ -60,6 +87,7 @@ export function GoalsTab() {
         <button
           type="button"
           aria-label="Add goal"
+          onClick={() => setShowAdd(true)}
           className="grid h-10 w-10 place-items-center rounded-[12px] bg-primary text-primary-foreground transition-transform active:scale-90"
         >
           <Plus className="h-5 w-5" strokeWidth={2.4} />
@@ -128,6 +156,62 @@ export function GoalsTab() {
             ))}
           </div>
         </section>
+      )}
+
+      {/* Add goal modal */}
+      {showAdd && (
+        <div className="fixed inset-0 z-40 flex items-end justify-center bg-foreground/30 backdrop-blur-sm">
+          <div className="animate-sp-fade-up mx-auto w-full max-w-md rounded-t-[24px] bg-card p-5 ring-1 ring-border">
+            <div className="mb-4 flex items-center justify-between">
+              <h3 className="text-base font-semibold text-foreground">
+                Add goal
+              </h3>
+              <button
+                type="button"
+                onClick={() => setShowAdd(false)}
+                aria-label="Close"
+                className="grid h-8 w-8 place-items-center rounded-[8px] bg-secondary text-muted-foreground"
+              >
+                <X className="h-4 w-4" />
+              </button>
+            </div>
+            <div className="space-y-3">
+              <div>
+                <label className="mb-1.5 block text-xs font-medium text-muted-foreground">
+                  Goal title
+                </label>
+                <input
+                  autoFocus
+                  value={goalTitle}
+                  onChange={(e) => setGoalTitle(e.target.value)}
+                  placeholder="e.g. Study sessions"
+                  className="w-full rounded-[12px] border border-input bg-background px-4 py-3 text-sm text-foreground outline-none focus:border-primary"
+                />
+              </div>
+              <div>
+                <label className="mb-1.5 block text-xs font-medium text-muted-foreground">
+                  Target
+                </label>
+                <input
+                  type="number"
+                  min={1}
+                  value={goalTarget}
+                  onChange={(e) => setGoalTarget(e.target.value)}
+                  onKeyDown={(e) => e.key === 'Enter' && addGoal()}
+                  placeholder="e.g. 7"
+                  className="w-full rounded-[12px] border border-input bg-background px-4 py-3 text-sm text-foreground outline-none focus:border-primary"
+                />
+              </div>
+            </div>
+            <button
+              type="button"
+              onClick={addGoal}
+              className="mt-4 w-full rounded-[16px] bg-primary py-3 text-sm font-semibold text-primary-foreground transition-transform active:scale-[0.98]"
+            >
+              Add goal
+            </button>
+          </div>
+        </div>
       )}
     </div>
   )

@@ -1,9 +1,9 @@
 'use client'
 
 import { useState } from 'react'
-import { CalendarDays, List, Plus } from 'lucide-react'
+import { CalendarDays, List, Plus, X } from 'lucide-react'
 import { cn } from '@/lib/utils'
-import { initialExams, initialSubjects } from './data'
+import { initialExams, initialSubjects, type Exam, type Subject } from './data'
 import { ProgressBar, SectionHeader } from './ui-bits'
 
 type ExamView = 'list' | 'calendar'
@@ -23,10 +23,64 @@ function gradeTone(grade: number) {
 
 export function AcademicTab() {
   const [examView, setExamView] = useState<ExamView>('list')
+  const [subjects, setSubjects] = useState<Subject[]>(initialSubjects)
+  const [exams, setExams] = useState<Exam[]>(initialExams)
+
+  const [showAddSubject, setShowAddSubject] = useState(false)
+  const [subjectName, setSubjectName] = useState('')
+  const [subjectGrade, setSubjectGrade] = useState('')
+  const [subjectTopic, setSubjectTopic] = useState('')
+
+  const [showAddExam, setShowAddExam] = useState(false)
+  const [examName, setExamName] = useState('')
+  const [examSubject, setExamSubject] = useState('')
+  const [examDate, setExamDate] = useState('')
+  const [examDuration, setExamDuration] = useState('')
+
+  const addSubject = () => {
+    const name = subjectName.trim()
+    if (!name) return
+    const grade = Math.min(100, Math.max(0, Number(subjectGrade) || 0))
+    setSubjects((prev) => [
+      ...prev,
+      {
+        id: `s${Date.now()}`,
+        name,
+        grade,
+        progress: 0,
+        nextTopic: subjectTopic.trim() || 'Getting started',
+      },
+    ])
+    setSubjectName('')
+    setSubjectGrade('')
+    setSubjectTopic('')
+    setShowAddSubject(false)
+  }
+
+  const addExam = () => {
+    const title = examName.trim()
+    const subject = examSubject.trim()
+    if (!title || !subject || !examDate) return
+    setExams((prev) => [
+      ...prev,
+      {
+        id: `e${Date.now()}`,
+        subject,
+        title,
+        date: examDate,
+        durationMin: Math.max(0, Number(examDuration) || 0),
+      },
+    ])
+    setExamName('')
+    setExamSubject('')
+    setExamDate('')
+    setExamDuration('')
+    setShowAddExam(false)
+  }
 
   // Build a simple July 2026 calendar grid for the demo
   const examDays = new Set(
-    initialExams.map((e) => new Date(e.date).getUTCDate()),
+    exams.map((e) => new Date(e.date).getUTCDate()),
   )
   const daysInMonth = 31
   const firstWeekday = new Date(Date.UTC(2026, 6, 1)).getUTCDay() // 0=Sun
@@ -49,6 +103,7 @@ export function AcademicTab() {
           action={
             <button
               type="button"
+              onClick={() => setShowAddSubject(true)}
               className="flex items-center gap-1.5 rounded-[12px] bg-primary px-3 py-1.5 text-xs font-semibold text-primary-foreground transition-transform active:scale-95"
             >
               <Plus className="h-3.5 w-3.5" strokeWidth={2.6} />
@@ -57,7 +112,7 @@ export function AcademicTab() {
           }
         />
         <div className="space-y-3">
-          {initialSubjects.map((s) => (
+          {subjects.map((s) => (
             <div
               key={s.id}
               className="rounded-[16px] bg-card p-4 ring-1 ring-border"
@@ -129,7 +184,7 @@ export function AcademicTab() {
 
         {examView === 'list' ? (
           <div className="space-y-3">
-            {initialExams.map((e) => (
+            {exams.map((e) => (
               <div
                 key={e.id}
                 className="flex items-center gap-4 rounded-[16px] bg-card p-4 ring-1 ring-border"
@@ -159,6 +214,7 @@ export function AcademicTab() {
             ))}
             <button
               type="button"
+              onClick={() => setShowAddExam(true)}
               className="w-full rounded-[16px] border border-dashed border-border py-3 text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
             >
               + Add exam
@@ -206,6 +262,150 @@ export function AcademicTab() {
           </div>
         )}
       </section>
+
+      {/* Add subject modal */}
+      {showAddSubject && (
+        <div className="fixed inset-0 z-40 flex items-end justify-center bg-foreground/30 backdrop-blur-sm">
+          <div className="animate-sp-fade-up mx-auto w-full max-w-md rounded-t-[24px] bg-card p-5 ring-1 ring-border">
+            <div className="mb-4 flex items-center justify-between">
+              <h3 className="text-base font-semibold text-foreground">
+                Add subject
+              </h3>
+              <button
+                type="button"
+                onClick={() => setShowAddSubject(false)}
+                aria-label="Close"
+                className="grid h-8 w-8 place-items-center rounded-[8px] bg-secondary text-muted-foreground"
+              >
+                <X className="h-4 w-4" />
+              </button>
+            </div>
+            <div className="space-y-3">
+              <div>
+                <label className="mb-1.5 block text-xs font-medium text-muted-foreground">
+                  Subject name
+                </label>
+                <input
+                  autoFocus
+                  value={subjectName}
+                  onChange={(e) => setSubjectName(e.target.value)}
+                  placeholder="e.g. Linear Algebra"
+                  className="w-full rounded-[12px] border border-input bg-background px-4 py-3 text-sm text-foreground outline-none focus:border-primary"
+                />
+              </div>
+              <div>
+                <label className="mb-1.5 block text-xs font-medium text-muted-foreground">
+                  Grade (%)
+                </label>
+                <input
+                  type="number"
+                  min={0}
+                  max={100}
+                  value={subjectGrade}
+                  onChange={(e) => setSubjectGrade(e.target.value)}
+                  placeholder="e.g. 85"
+                  className="w-full rounded-[12px] border border-input bg-background px-4 py-3 text-sm text-foreground outline-none focus:border-primary"
+                />
+              </div>
+              <div>
+                <label className="mb-1.5 block text-xs font-medium text-muted-foreground">
+                  Next topic
+                </label>
+                <input
+                  value={subjectTopic}
+                  onChange={(e) => setSubjectTopic(e.target.value)}
+                  placeholder="e.g. Eigenvalues"
+                  className="w-full rounded-[12px] border border-input bg-background px-4 py-3 text-sm text-foreground outline-none focus:border-primary"
+                />
+              </div>
+            </div>
+            <button
+              type="button"
+              onClick={addSubject}
+              className="mt-4 w-full rounded-[16px] bg-primary py-3 text-sm font-semibold text-primary-foreground transition-transform active:scale-[0.98]"
+            >
+              Add subject
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Add exam modal */}
+      {showAddExam && (
+        <div className="fixed inset-0 z-40 flex items-end justify-center bg-foreground/30 backdrop-blur-sm">
+          <div className="animate-sp-fade-up mx-auto w-full max-w-md rounded-t-[24px] bg-card p-5 ring-1 ring-border">
+            <div className="mb-4 flex items-center justify-between">
+              <h3 className="text-base font-semibold text-foreground">
+                Add exam
+              </h3>
+              <button
+                type="button"
+                onClick={() => setShowAddExam(false)}
+                aria-label="Close"
+                className="grid h-8 w-8 place-items-center rounded-[8px] bg-secondary text-muted-foreground"
+              >
+                <X className="h-4 w-4" />
+              </button>
+            </div>
+            <div className="space-y-3">
+              <div>
+                <label className="mb-1.5 block text-xs font-medium text-muted-foreground">
+                  Exam name
+                </label>
+                <input
+                  autoFocus
+                  value={examName}
+                  onChange={(e) => setExamName(e.target.value)}
+                  placeholder="e.g. Midterm"
+                  className="w-full rounded-[12px] border border-input bg-background px-4 py-3 text-sm text-foreground outline-none focus:border-primary"
+                />
+              </div>
+              <div>
+                <label className="mb-1.5 block text-xs font-medium text-muted-foreground">
+                  Subject
+                </label>
+                <input
+                  value={examSubject}
+                  onChange={(e) => setExamSubject(e.target.value)}
+                  placeholder="e.g. Mathematics"
+                  className="w-full rounded-[12px] border border-input bg-background px-4 py-3 text-sm text-foreground outline-none focus:border-primary"
+                />
+              </div>
+              <div>
+                <label className="mb-1.5 block text-xs font-medium text-muted-foreground">
+                  Date
+                </label>
+                <input
+                  type="date"
+                  value={examDate}
+                  onChange={(e) => setExamDate(e.target.value)}
+                  className="w-full rounded-[12px] border border-input bg-background px-4 py-3 text-sm text-foreground outline-none focus:border-primary"
+                />
+              </div>
+              <div>
+                <label className="mb-1.5 block text-xs font-medium text-muted-foreground">
+                  Duration (minutes)
+                </label>
+                <input
+                  type="number"
+                  min={0}
+                  value={examDuration}
+                  onChange={(e) => setExamDuration(e.target.value)}
+                  placeholder="e.g. 90"
+                  className="w-full rounded-[12px] border border-input bg-background px-4 py-3 text-sm text-foreground outline-none focus:border-primary"
+                />
+              </div>
+            </div>
+            <button
+              type="button"
+              onClick={addExam}
+              className="mt-4 w-full rounded-[16px] bg-primary py-3 text-sm font-semibold text-primary-foreground transition-transform active:scale-[0.98]"
+            >
+              Add exam
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   )
 }
